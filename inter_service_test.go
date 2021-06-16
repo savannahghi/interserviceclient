@@ -1,4 +1,4 @@
-package go_utils_test
+package interserviceclient_test
 
 import (
 	"bytes"
@@ -13,12 +13,50 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	base "github.com/savannahghi/go_utils"
+	"github.com/savannahghi/interserviceclient"
+	"github.com/savannahghi/server_utils"
 	"github.com/stretchr/testify/assert"
 )
 
+// CoverageThreshold sets the test coverage threshold below which the tests will fail
+const CoverageThreshold = 0.75
+
+func TestMain(m *testing.M) {
+	os.Setenv("MESSAGE_KEY", "this-is-a-test-key$$$")
+	os.Setenv("ENVIRONMENT", "staging")
+	err := os.Setenv("ROOT_COLLECTION_SUFFIX", "staging")
+	if err != nil {
+		if server_utils.IsDebug() {
+			log.Printf("can't set root collection suffix in env: %s", err)
+		}
+		os.Exit(-1)
+	}
+	existingDebug, err := server_utils.GetEnvVar("DEBUG")
+	if err != nil {
+		existingDebug = "false"
+	}
+
+	os.Setenv("DEBUG", "true")
+
+	rc := m.Run()
+	// Restore DEBUG envar to original value after running test
+	os.Setenv("DEBUG", existingDebug)
+
+	// rc 0 means we've passed,
+	// and CoverMode will be non empty if run with -cover
+	if rc == 0 && testing.CoverMode() != "" {
+		c := testing.Coverage()
+		if c < CoverageThreshold {
+			fmt.Println("Tests passed but coverage failed at", c)
+			rc = -1
+		}
+	}
+
+	os.Exit(rc)
+}
+
 func TestGetJWTKey(t *testing.T) {
-	existingJWTKey, err := base.GetEnvVar("JWT_KEY")
+	existingJWTKey, err := server_utils.GetEnvVar("JWT_KEY")
 	if err != nil {
 		existingJWTKey = "an open secret"
 	}
@@ -34,7 +72,7 @@ func TestGetJWTKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := base.GetJWTKey(); string(got) != tt.want {
+			if got := interserviceclient.GetJWTKey(); string(got) != tt.want {
 				t.Errorf("base.GetJWTKey() = %v, want %v", got, tt.want)
 			}
 		})
@@ -43,7 +81,7 @@ func TestGetJWTKey(t *testing.T) {
 }
 
 func TestNewInterserviceClient(t *testing.T) {
-	srv, err := base.NewInterserviceClient(base.ISCService{Name: "otp", RootDomain: "https://example.com"})
+	srv, err := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 	assert.Nil(t, err)
 	assert.NotNil(t, srv)
 	assert.Equal(t, "otp", srv.Name)
@@ -51,7 +89,7 @@ func TestNewInterserviceClient(t *testing.T) {
 }
 
 func TestInterServiceClient_CreateAuthToken(t *testing.T) {
-	service, _ := base.NewInterserviceClient(base.ISCService{Name: "otp", RootDomain: "https://example.com"})
+	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 	tests := []struct {
 		name    string
 		want    string
@@ -79,21 +117,21 @@ func TestInterServiceClient_CreateAuthToken(t *testing.T) {
 
 func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
 	// Obtain the current value of ISCExpireEnvVarName
-	currentIscExpire, err := base.GetEnvVar(base.ISCExpireEnvVarName)
+	currentIscExpire, err := server_utils.GetEnvVar(interserviceclient.ISCExpireEnvVarName)
 	if err != nil {
 		log.Printf("no INTER_SERVICE_TOKEN_EXPIRE_MINUTES variable set")
 	}
 
 	// Set the ISCExpireEnvVarName to a non-int value
-	err = os.Setenv(base.ISCExpireEnvVarName, "not a valid int")
+	err = os.Setenv(interserviceclient.ISCExpireEnvVarName, "not a valid int")
 	if err != nil {
 		t.Errorf("can't set ISC expire env var name: %v", err)
 		return
 	}
 
 	// Run the test, expect an error
-	client, err := base.NewInterserviceClient(
-		base.ISCService{
+	client, err := interserviceclient.NewInterserviceClient(
+		interserviceclient.ISCService{
 			Name:       "otp",
 			RootDomain: "https://example.com",
 		},
@@ -117,7 +155,7 @@ func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
 	}
 
 	// Restore ISCExpireEnvVarName to what it was before the test
-	err = os.Setenv(base.ISCExpireEnvVarName, currentIscExpire)
+	err = os.Setenv(interserviceclient.ISCExpireEnvVarName, currentIscExpire)
 	if err != nil {
 		t.Errorf("unable to restore ISC expire env var: %v", err)
 		return
@@ -163,7 +201,7 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, _ := base.NewInterserviceClient(base.ISCService{Name: tt.args.name, RootDomain: tt.args.endpoint})
+			c, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: tt.args.name, RootDomain: tt.args.endpoint})
 
 			got, err := c.MakeRequest(tt.args.method, tt.args.path, tt.args.body)
 
@@ -187,7 +225,7 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 }
 
 func TestHasValidJWTBearerToken(t *testing.T) {
-	service, _ := base.NewInterserviceClient(base.ISCService{Name: "otp", RootDomain: "https://example.com"})
+	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 
 	validTokenRequest := httptest.NewRequest(http.MethodGet, "/", nil)
 	validToken, _ := service.CreateAuthToken()
@@ -235,7 +273,7 @@ func TestHasValidJWTBearerToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, _ := base.HasValidJWTBearerToken(tt.args.r)
+			got, got1, _ := interserviceclient.HasValidJWTBearerToken(tt.args.r)
 			if got != tt.want {
 				t.Errorf("HasValidJWTBearerToken() got = %v, want %v", got, tt.want)
 			}
@@ -248,12 +286,12 @@ func TestHasValidJWTBearerToken(t *testing.T) {
 
 func TestInterServiceAuthenticationMiddleware(t *testing.T) {
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
-	mw := base.InterServiceAuthenticationMiddleware()
+	mw := interserviceclient.InterServiceAuthenticationMiddleware()
 	h := mw(next)
 	rw := httptest.NewRecorder()
 	reader := bytes.NewBuffer([]byte("sample"))
 
-	service, _ := base.NewInterserviceClient(base.ISCService{Name: "otp", RootDomain: "https://example.com"})
+	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 	token, _ := service.CreateAuthToken()
 	authHeader := fmt.Sprintf("Bearer %s", token)
 	req := httptest.NewRequest(http.MethodPost, "/", reader)
@@ -266,7 +304,7 @@ func TestInterServiceAuthenticationMiddleware(t *testing.T) {
 }
 
 func createInvalidAuthToken() (string, error) {
-	claims := &base.Claims{
+	claims := &interserviceclient.Claims{
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(1 * time.Minute).Unix(),
@@ -282,7 +320,7 @@ func createInvalidAuthToken() (string, error) {
 }
 
 func TestGetDepFromConfig(t *testing.T) {
-	deps := []base.Dep{
+	deps := []interserviceclient.Dep{
 		{
 			DepName:       "one",
 			DepRootDomain: "https://one.com",
@@ -301,35 +339,35 @@ func TestGetDepFromConfig(t *testing.T) {
 		},
 	}
 
-	one := base.GetDepFromConfig("one", deps)
+	one := interserviceclient.GetDepFromConfig("one", deps)
 	assert.NotNil(t, one)
 	assert.Equal(t, "one", one.DepName)
 	assert.Equal(t, "https://one.com", one.DepRootDomain)
 
-	two := base.GetDepFromConfig("two", deps)
+	two := interserviceclient.GetDepFromConfig("two", deps)
 	assert.NotNil(t, two)
 	assert.Equal(t, "two", two.DepName)
 	assert.Equal(t, "https://two.com", two.DepRootDomain)
 
-	three := base.GetDepFromConfig("three", deps)
+	three := interserviceclient.GetDepFromConfig("three", deps)
 	assert.NotNil(t, three)
 	assert.Equal(t, "three", three.DepName)
 	assert.Equal(t, "https://three.com", three.DepRootDomain)
 
-	four := base.GetDepFromConfig("four", deps)
+	four := interserviceclient.GetDepFromConfig("four", deps)
 	assert.NotNil(t, four)
 	assert.Equal(t, "four", four.DepName)
 	assert.Equal(t, "https://four.com", four.DepRootDomain)
 }
 
 func TestGetPathToDepsFile(t *testing.T) {
-	p := base.PathToDepsFile()
+	p := interserviceclient.PathToDepsFile()
 	assert.NotEmpty(t, p)
-	assert.Equal(t, true, strings.HasSuffix(p, base.DepsFileName))
+	assert.Equal(t, true, strings.HasSuffix(p, interserviceclient.DepsFileName))
 }
 
 func TestLoadDepsFromYAML(t *testing.T) {
-	got, err := base.LoadDepsFromYAML()
+	got, err := interserviceclient.LoadDepsFromYAML()
 	if err != nil {
 		t.Errorf("can't load deps from YAML: %v", err)
 		return

@@ -1,4 +1,4 @@
-package go_utils
+package interserviceclient
 
 import (
 	"bytes"
@@ -8,7 +8,11 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"regexp"
 	"strings"
+
+	"github.com/savannahghi/server_utils"
+	"github.com/ttacon/libphonenumber"
 )
 
 const (
@@ -72,7 +76,7 @@ func makeRequest(phoneNumbers []string, message, EndPoint string, client InterSe
 	if err != nil {
 		return err
 	}
-	if IsDebug() {
+	if server_utils.IsDebug() {
 		b, _ := httputil.DumpResponse(resp, true)
 		log.Println(string(b))
 	}
@@ -85,6 +89,37 @@ func makeRequest(phoneNumbers []string, message, EndPoint string, client InterSe
 //IsKenyanNumber checks if phone number belongs to KENYA TELECOM
 func IsKenyanNumber(phoneNumber string) bool {
 	return strings.HasPrefix(phoneNumber, "+254")
+}
+
+// IsMSISDNValid uses regular expression to validate the a phone number
+// TODO: Retire this once once to use the once in (converters and formatters) package
+func IsMSISDNValid(msisdn string) bool {
+	if len(msisdn) < 10 {
+		return false
+	}
+	reKen := regexp.MustCompile(`^(?:254|\+254|0)?((7|1)(?:(?:[129][0-9])|(?:0[0-8])|(4[0-1]))[0-9]{6})$`)
+	re := regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
+	if !reKen.MatchString(msisdn) {
+		return re.MatchString(msisdn)
+	}
+	return reKen.MatchString(msisdn)
+}
+
+// NormalizeMSISDN validates the input phone number.
+// For valid phone numbers, it normalizes them to international format
+// e.g +2547........
+func NormalizeMSISDN(msisdn string) (*string, error) {
+	if !IsMSISDNValid(msisdn) {
+		return nil, fmt.Errorf("invalid phone number: %s", msisdn)
+	}
+	num, err := libphonenumber.Parse(msisdn, defaultRegion)
+	if err != nil {
+		return nil, err
+	}
+	formatted := libphonenumber.Format(num, libphonenumber.INTERNATIONAL)
+	cleaned := strings.ReplaceAll(formatted, " ", "")
+	cleaned = strings.ReplaceAll(cleaned, "-", "")
+	return &cleaned, nil
 }
 
 // VerifyOTP confirms a phone number is valid by verifying the code that was sent to the number
@@ -114,7 +149,7 @@ func VerifyOTP(msisdn string, otp string, otpClient *InterServiceClient) (bool, 
 			"can't complete OTP verification request: %w", err)
 	}
 
-	if IsDebug() {
+	if server_utils.IsDebug() {
 		b, _ := httputil.DumpResponse(resp, true)
 		log.Println(string(b))
 	}

@@ -1,4 +1,4 @@
-package go_utils
+package interserviceclient
 
 import (
 	"bytes"
@@ -37,7 +37,7 @@ type ISCService struct {
 
 // GetJWTKey returns a byte slice of the JWT secret key
 func GetJWTKey() []byte {
-	key := MustGetEnvVar(JWTSecretKey)
+	key := server_utils.MustGetEnvVar(JWTSecretKey)
 	return []byte(key)
 }
 
@@ -69,7 +69,7 @@ func NewInterserviceClient(s ISCService) (*InterServiceClient, error) {
 // CreateAuthToken returns a signed JWT for use in authentication.
 func (c InterServiceClient) CreateAuthToken() (string, error) {
 	var expireMinutes int
-	expireMinutesStr, err := GetEnvVar(ISCExpireEnvVarName)
+	expireMinutesStr, err := server_utils.GetEnvVar(ISCExpireEnvVarName)
 	if err != nil {
 		// Fallback for when the env var is not set
 		expireMinutesStr = "60"
@@ -120,7 +120,7 @@ func (c InterServiceClient) MakeRequest(method string, path string, body interfa
 		return nil, reqErr
 	}
 
-	if IsDebug() {
+	if server_utils.IsDebug() {
 		r, _ := httputil.DumpRequest(req, true)
 		log.Println(string(r))
 	}
@@ -221,7 +221,7 @@ func getDepsPath(path string) string {
 // GetRunningEnvironment returns the environment where the service is running. Important
 // so as to point to the correct deps
 func GetRunningEnvironment() string {
-	return MustGetEnvVar(Environment)
+	return server_utils.MustGetEnvVar(Environment)
 }
 
 // GetDepFromConfig retrives a specific config from config slice
