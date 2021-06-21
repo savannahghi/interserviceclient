@@ -116,6 +116,8 @@ func TestInterServiceClient_CreateAuthToken(t *testing.T) {
 }
 
 func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
+	// TODO: Should be set as an env variable
+	os.Setenv("INTER_SERVICE_TOKEN_EXPIRE_MINUTES ", "30")
 	// Obtain the current value of ISCExpireEnvVarName
 	currentIscExpire, err := server_utils.GetEnvVar(interserviceclient.ISCExpireEnvVarName)
 	if err != nil {
