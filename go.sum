@@ -264,8 +264,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/ryanuber/columnize v2.1.0+incompatible/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
-github.com/savannahghi/server_utils v0.0.1 h1:q6SL4BRvkpYJujXvWwCl4vU1U+VTzKRGfNXnl0H6tfw=
-github.com/savannahghi/server_utils v0.0.1/go.mod h1:Tldm4Op4ARxk8xaP3BA0V52XVZEJenkq0ck4FCdEp+I=
+github.com/savannahghi/serverutils v0.0.2 h1:ZVRRdyRH47qlqZCiZ3FKOd8W4ufhtvHQLLZxAQZonqk=
+github.com/savannahghi/serverutils v0.0.2/go.mod h1:sLX0El0i0DKN/9cUkB8xqm5cVMP79qCZvK60EzB7Pa4=
 github.com/schollz/closestmatch v2.1.0+incompatible/go.mod h1:RtP1ddjLong6gTkbtmuhtR2uUrrJOpYzYRvbcPAid+g=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=

@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"github.com/ttacon/libphonenumber"
 )
 
@@ -76,7 +76,7 @@ func makeRequest(phoneNumbers []string, message, EndPoint string, client InterSe
 	if err != nil {
 		return err
 	}
-	if server_utils.IsDebug() {
+	if serverutils.IsDebug() {
 		b, _ := httputil.DumpResponse(resp, true)
 		log.Println(string(b))
 	}
@@ -149,7 +149,7 @@ func VerifyOTP(msisdn string, otp string, otpClient *InterServiceClient) (bool, 
 			"can't complete OTP verification request: %w", err)
 	}
 
-	if server_utils.IsDebug() {
+	if serverutils.IsDebug() {
 		b, _ := httputil.DumpResponse(resp, true)
 		log.Println(string(b))
 	}

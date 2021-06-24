@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,7 +37,7 @@ type ISCService struct {
 
 // GetJWTKey returns a byte slice of the JWT secret key
 func GetJWTKey() []byte {
-	key := server_utils.MustGetEnvVar(JWTSecretKey)
+	key := serverutils.MustGetEnvVar(JWTSecretKey)
 	return []byte(key)
 }
 
@@ -69,7 +69,7 @@ func NewInterserviceClient(s ISCService) (*InterServiceClient, error) {
 // CreateAuthToken returns a signed JWT for use in authentication.
 func (c InterServiceClient) CreateAuthToken() (string, error) {
 	var expireMinutes int
-	expireMinutesStr, err := server_utils.GetEnvVar(ISCExpireEnvVarName)
+	expireMinutesStr, err := serverutils.GetEnvVar(ISCExpireEnvVarName)
 	if err != nil {
 		// Fallback for when the env var is not set
 		expireMinutesStr = "60"
@@ -120,7 +120,7 @@ func (c InterServiceClient) MakeRequest(method string, path string, body interfa
 		return nil, reqErr
 	}
 
-	if server_utils.IsDebug() {
+	if serverutils.IsDebug() {
 		r, _ := httputil.DumpRequest(req, true)
 		log.Println(string(r))
 	}
@@ -158,7 +158,7 @@ func InterServiceAuthenticationMiddleware() func(http.Handler) http.Handler {
 					errs = append(errs, errMap)
 				}
 
-				server_utils.WriteJSONResponse(w, errs, http.StatusUnauthorized)
+				serverutils.WriteJSONResponse(w, errs, http.StatusUnauthorized)
 			})
 	}
 }
@@ -169,7 +169,7 @@ func HasValidJWTBearerToken(r *http.Request) (bool, map[string]string, *jwt.Toke
 	bearerToken, err := ExtractBearerToken(r)
 	if err != nil {
 
-		return false, server_utils.ErrorMap(err), nil
+		return false, serverutils.ErrorMap(err), nil
 	}
 
 	claims := &Claims{}
@@ -179,7 +179,7 @@ func HasValidJWTBearerToken(r *http.Request) (bool, map[string]string, *jwt.Toke
 	})
 
 	if err != nil {
-		return false, server_utils.ErrorMap(err), nil
+		return false, serverutils.ErrorMap(err), nil
 	}
 
 	return true, nil, token
@@ -221,7 +221,7 @@ func getDepsPath(path string) string {
 // GetRunningEnvironment returns the environment where the service is running. Important
 // so as to point to the correct deps
 func GetRunningEnvironment() string {
-	return server_utils.MustGetEnvVar(Environment)
+	return serverutils.MustGetEnvVar(Environment)
 }
 
 // GetDepFromConfig retrives a specific config from config slice

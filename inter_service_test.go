@@ -14,7 +14,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/savannahghi/interserviceclient"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,12 +26,12 @@ func TestMain(m *testing.M) {
 	os.Setenv("ENVIRONMENT", "staging")
 	err := os.Setenv("ROOT_COLLECTION_SUFFIX", "staging")
 	if err != nil {
-		if server_utils.IsDebug() {
+		if serverutils.IsDebug() {
 			log.Printf("can't set root collection suffix in env: %s", err)
 		}
 		os.Exit(-1)
 	}
-	existingDebug, err := server_utils.GetEnvVar("DEBUG")
+	existingDebug, err := serverutils.GetEnvVar("DEBUG")
 	if err != nil {
 		existingDebug = "false"
 	}
@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetJWTKey(t *testing.T) {
-	existingJWTKey, err := server_utils.GetEnvVar("JWT_KEY")
+	existingJWTKey, err := serverutils.GetEnvVar("JWT_KEY")
 	if err != nil {
 		existingJWTKey = "an open secret"
 	}
@@ -119,7 +119,7 @@ func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
 	// TODO: Should be set as an env variable
 	os.Setenv("INTER_SERVICE_TOKEN_EXPIRE_MINUTES ", "30")
 	// Obtain the current value of ISCExpireEnvVarName
-	currentIscExpire, err := server_utils.GetEnvVar(interserviceclient.ISCExpireEnvVarName)
+	currentIscExpire, err := serverutils.GetEnvVar(interserviceclient.ISCExpireEnvVarName)
 	if err != nil {
 		log.Printf("no INTER_SERVICE_TOKEN_EXPIRE_MINUTES variable set")
 	}
