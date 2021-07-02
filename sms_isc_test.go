@@ -1,6 +1,7 @@
 package interserviceclient_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/savannahghi/interserviceclient"
@@ -9,7 +10,7 @@ import (
 const testPhone = "+254723002959"
 
 func TestSendSMS(t *testing.T) {
-
+	ctx := context.Background()
 	// Note: This is a very brittle test case.
 	// Any change to the service urls would probably lead to a failure
 	// There's probably a better way to do this (Mocking *wink wink)
@@ -28,6 +29,7 @@ func TestSendSMS(t *testing.T) {
 	smsEndPoint := "internal/send_sms"
 
 	type args struct {
+		ctx             context.Context
 		phoneNumbers    []string
 		message         string
 		smsIscClient    interserviceclient.SmsISC
@@ -41,6 +43,7 @@ func TestSendSMS(t *testing.T) {
 		{
 			name: "good test case",
 			args: args{
+				ctx:          ctx,
 				phoneNumbers: []string{testPhone},
 				message:      "Test Text Message",
 				smsIscClient: interserviceclient.SmsISC{
@@ -57,6 +60,7 @@ func TestSendSMS(t *testing.T) {
 		{
 			name: "bad test case: Empty Message",
 			args: args{
+				ctx:          ctx,
 				phoneNumbers: []string{testPhone},
 				message:      "",
 				smsIscClient: interserviceclient.SmsISC{
@@ -73,6 +77,7 @@ func TestSendSMS(t *testing.T) {
 		{
 			name: "bad test case: No Phone Numbers",
 			args: args{
+				ctx:          ctx,
 				phoneNumbers: []string{},
 				message:      "Test Text Message",
 				smsIscClient: interserviceclient.SmsISC{
@@ -89,6 +94,7 @@ func TestSendSMS(t *testing.T) {
 		{
 			name: "bad test case: Invalid Phone Numbers",
 			args: args{
+				ctx:          ctx,
 				phoneNumbers: []string{"not-a-number"},
 				message:      "Test Text Message",
 				smsIscClient: interserviceclient.SmsISC{
@@ -105,7 +111,7 @@ func TestSendSMS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := interserviceclient.SendSMS(tt.args.phoneNumbers, tt.args.message, tt.args.smsIscClient, tt.args.twilioIscClient); (err != nil) != tt.wantErr {
+			if err := interserviceclient.SendSMS(tt.args.ctx, tt.args.phoneNumbers, tt.args.message, tt.args.smsIscClient, tt.args.twilioIscClient); (err != nil) != tt.wantErr {
 				t.Errorf("SendSMS() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -125,6 +131,7 @@ func TestVerifyOTP(t *testing.T) {
 	// 	return
 	// }
 	type args struct {
+		ctx              context.Context
 		msisdn           string
 		verificationCode string
 		client           *interserviceclient.InterServiceClient
@@ -158,7 +165,7 @@ func TestVerifyOTP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := interserviceclient.VerifyOTP(tt.args.msisdn, tt.args.verificationCode, tt.args.client)
+			got, err := interserviceclient.VerifyOTP(tt.args.ctx, tt.args.msisdn, tt.args.verificationCode, tt.args.client)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("VerifyOTP() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -1,6 +1,7 @@
 package interserviceclient
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -9,8 +10,9 @@ import (
 
 // GetInterserviceBearerTokenHeader returns a valid isc bearer token header
 func GetInterserviceBearerTokenHeader(t *testing.T, rootDomain string, serviceName string) string {
+	ctx := context.Background()
 	isc := GetInterserviceClient(t, rootDomain, serviceName)
-	authToken, err := isc.CreateAuthToken()
+	authToken, err := isc.CreateAuthToken(ctx)
 	assert.Nil(t, err)
 	assert.NotZero(t, authToken)
 	bearerHeader := fmt.Sprintf("Bearer %s", authToken)

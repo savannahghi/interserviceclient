@@ -2,6 +2,7 @@ package interserviceclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -29,7 +30,7 @@ type SmsISC struct {
 }
 
 // SendSMS is send a text message to specified phone No.s both local and foreign
-func SendSMS(phoneNumbers []string, message string, smsClient, twilioClient SmsISC) error {
+func SendSMS(ctx context.Context, phoneNumbers []string, message string, smsClient, twilioClient SmsISC) error {
 
 	if message == "" {
 		return fmt.Errorf("sms not sent: `message` needs to be supplied")
@@ -51,14 +52,14 @@ func SendSMS(phoneNumbers []string, message string, smsClient, twilioClient SmsI
 	}
 
 	if len(foreignPhoneNos) >= 1 {
-		err := makeRequest(foreignPhoneNos, message, twilioClient.EndPoint, *twilioClient.Isc)
+		err := makeRequest(ctx, foreignPhoneNos, message, twilioClient.EndPoint, *twilioClient.Isc)
 		if err != nil {
 			return fmt.Errorf("sms not sent: %v", err)
 		}
 	}
 
 	if len(localPhoneNos) >= 1 {
-		err := makeRequest(localPhoneNos, message, smsClient.EndPoint, *smsClient.Isc)
+		err := makeRequest(ctx, localPhoneNos, message, smsClient.EndPoint, *smsClient.Isc)
 		if err != nil {
 			return fmt.Errorf("sms not sent: %v", err)
 		}
@@ -67,12 +68,12 @@ func SendSMS(phoneNumbers []string, message string, smsClient, twilioClient SmsI
 	return nil
 }
 
-func makeRequest(phoneNumbers []string, message, EndPoint string, client InterServiceClient) error {
+func makeRequest(ctx context.Context, phoneNumbers []string, message, EndPoint string, client InterServiceClient) error {
 	payload := map[string]interface{}{
 		"to":      phoneNumbers,
 		"message": message,
 	}
-	resp, err := client.MakeRequest(http.MethodPost, EndPoint, payload)
+	resp, err := client.MakeRequest(ctx, http.MethodPost, EndPoint, payload)
 	if err != nil {
 		return err
 	}
@@ -123,7 +124,7 @@ func NormalizeMSISDN(msisdn string) (*string, error) {
 }
 
 // VerifyOTP confirms a phone number is valid by verifying the code that was sent to the number
-func VerifyOTP(msisdn string, otp string, otpClient *InterServiceClient) (bool, error) {
+func VerifyOTP(ctx context.Context, msisdn string, otp string, otpClient *InterServiceClient) (bool, error) {
 	if otpClient == nil {
 		return false, fmt.Errorf("nil OTP client")
 	}
@@ -143,7 +144,7 @@ func VerifyOTP(msisdn string, otp string, otpClient *InterServiceClient) (bool, 
 		VerificationCode: otp,
 	}
 
-	resp, err := otpClient.MakeRequest(http.MethodPost, VerifyOTPEndPoint, verifyPayload)
+	resp, err := otpClient.MakeRequest(ctx, http.MethodPost, VerifyOTPEndPoint, verifyPayload)
 	if err != nil {
 		return false, fmt.Errorf(
 			"can't complete OTP verification request: %w", err)
@@ -177,13 +178,13 @@ func VerifyOTP(msisdn string, otp string, otpClient *InterServiceClient) (bool, 
 }
 
 // SendOTPHelper is a helper used in tests to send OTP to a test number
-func SendOTPHelper(msisdn string, otpClient *InterServiceClient) (string, error) {
+func SendOTPHelper(ctx context.Context, msisdn string, otpClient *InterServiceClient) (string, error) {
 	// we prepare the OTP payload
 	payload := map[string]interface{}{
 		"msisdn": msisdn,
 	}
 	// make the request
-	resp, err := otpClient.MakeRequest(http.MethodPost, SendOTPEndPoint, payload)
+	resp, err := otpClient.MakeRequest(ctx, http.MethodPost, SendOTPEndPoint, payload)
 	if err != nil {
 		return "", fmt.Errorf("unable to make a send otp request: %w", err)
 	}
