@@ -2,6 +2,7 @@ package interserviceclient_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -89,6 +90,7 @@ func TestNewInterserviceClient(t *testing.T) {
 }
 
 func TestInterServiceClient_CreateAuthToken(t *testing.T) {
+	ctx := context.Background()
 	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 	tests := []struct {
 		name    string
@@ -103,7 +105,7 @@ func TestInterServiceClient_CreateAuthToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := service
-			got, err := c.CreateAuthToken()
+			got, err := c.CreateAuthToken(ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InterServiceClient.CreateAuthToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -116,6 +118,7 @@ func TestInterServiceClient_CreateAuthToken(t *testing.T) {
 }
 
 func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
+	ctx := context.Background()
 	// TODO: Should be set as an env variable
 	os.Setenv("INTER_SERVICE_TOKEN_EXPIRE_MINUTES ", "30")
 	// Obtain the current value of ISCExpireEnvVarName
@@ -144,7 +147,7 @@ func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
 		return
 	}
 
-	token, err := client.CreateAuthToken()
+	token, err := client.CreateAuthToken(ctx)
 
 	// We expect an error here
 	if err == nil {
@@ -164,7 +167,10 @@ func TestInterServiceClient_CreateAuthErrTest(t *testing.T) {
 	}
 }
 func TestInterServiceClient_MakeRequest(t *testing.T) {
+	ctx := context.Background()
+
 	type args struct {
+		ctx      context.Context
 		name     string
 		endpoint string
 		method   string
@@ -181,6 +187,7 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 		{
 			name: "Valid request",
 			args: args{
+				ctx:      ctx,
 				name:     "otp",
 				endpoint: "https://example.com",
 				method:   http.MethodPost,
@@ -192,6 +199,7 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 		{
 			name: "Invalid request",
 			args: args{
+				ctx:      ctx,
 				name:     "otp",
 				endpoint: "https://google.com",
 				method:   http.MethodPost,
@@ -205,7 +213,7 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: tt.args.name, RootDomain: tt.args.endpoint})
 
-			got, err := c.MakeRequest(tt.args.method, tt.args.path, tt.args.body)
+			got, err := c.MakeRequest(tt.args.ctx, tt.args.method, tt.args.path, tt.args.body)
 
 			if err != nil && !tt.wantErr {
 				t.Errorf("InterServiceClient.MakeRequest() error = %v, wantErr %v", err, tt.wantErr)
@@ -227,10 +235,11 @@ func TestInterServiceClient_MakeRequest(t *testing.T) {
 }
 
 func TestHasValidJWTBearerToken(t *testing.T) {
+	ctx := context.Background()
 	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 
 	validTokenRequest := httptest.NewRequest(http.MethodGet, "/", nil)
-	validToken, _ := service.CreateAuthToken()
+	validToken, _ := service.CreateAuthToken(ctx)
 	validTokenRequest.Header.Set("Authorization", "Bearer "+validToken)
 
 	emptyHeaderRequest := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -287,6 +296,7 @@ func TestHasValidJWTBearerToken(t *testing.T) {
 }
 
 func TestInterServiceAuthenticationMiddleware(t *testing.T) {
+	ctx := context.Background()
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	mw := interserviceclient.InterServiceAuthenticationMiddleware()
 	h := mw(next)
@@ -294,7 +304,7 @@ func TestInterServiceAuthenticationMiddleware(t *testing.T) {
 	reader := bytes.NewBuffer([]byte("sample"))
 
 	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
-	token, _ := service.CreateAuthToken()
+	token, _ := service.CreateAuthToken(ctx)
 	authHeader := fmt.Sprintf("Bearer %s", token)
 	req := httptest.NewRequest(http.MethodPost, "/", reader)
 	req.Header.Add("Authorization", authHeader)

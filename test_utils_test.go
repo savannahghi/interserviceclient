@@ -1,6 +1,7 @@
 package interserviceclient_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/savannahghi/interserviceclient"
@@ -54,9 +55,11 @@ func TestGetInterserviceClient(t *testing.T) {
 }
 
 func TestGetInterserviceBearerTokenHeader(t *testing.T) {
+	ctx := context.Background()
 	service, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{Name: "otp", RootDomain: "https://example.com"})
 
 	type args struct {
+		ctx                  context.Context
 		OnboardingRootDomain string
 		OnboardingName       string
 	}
@@ -68,6 +71,7 @@ func TestGetInterserviceBearerTokenHeader(t *testing.T) {
 		{
 			name: "success: successfully got interservice client",
 			args: args{
+				ctx:                  ctx,
 				OnboardingRootDomain: "https://example.com",
 				OnboardingName:       "otp",
 			},
@@ -79,7 +83,7 @@ func TestGetInterserviceBearerTokenHeader(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			userResponse := interserviceclient.GetInterserviceBearerTokenHeader(t, tt.args.OnboardingRootDomain, tt.args.OnboardingName)
 			c := service
-			got, err := c.CreateAuthToken()
+			got, err := c.CreateAuthToken(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InterServiceClient.CreateAuthToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
