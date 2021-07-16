@@ -42,6 +42,7 @@ before_script:
   - go get -u github.com/client9/misspell/cmd/misspell
   - go get -u github.com/gordonklaus/ineffassign
   - go get github.com/fzipp/gocyclo
+  - go get github.com/stretchr/testify/assert@v1.7.0
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_c1e1fb6e0a0e_key -iv $encrypted_c1e1fb6e0a0e_iv -in ci-account-key-file.json.enc -out ci-account-key-file.json -d
