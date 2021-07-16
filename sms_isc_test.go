@@ -55,7 +55,7 @@ func TestSendSMS(t *testing.T) {
 					EndPoint: smsEndPoint,
 				},
 			},
-			wantErr: true, // TODO: fix the error and return to false
+			wantErr: false,
 		},
 		{
 			name: "bad test case: Empty Message",

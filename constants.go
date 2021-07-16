@@ -2,7 +2,6 @@ package interserviceclient
 
 /* #nosec */
 const (
-	defaultRegion = "KE"
 	// Secret Key for signing json web tokens
 	JWTSecretKey = "JWT_KEY"
 

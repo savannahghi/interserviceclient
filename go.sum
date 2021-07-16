@@ -234,6 +234,8 @@ github.com/kataras/iris/v12 v12.1.8/go.mod h1:LMYy4VlP67TQ3Zgriz8RE2h2kMZV2SgMYb
 github.com/kataras/neffos v0.0.14/go.mod h1:8lqADm8PnbeFfL7CLXh1WHw53dG27MC3pgi2R1rmoTE=
 github.com/kataras/pio v0.0.2/go.mod h1:hAoW0t9UmXi4R5Oyq5Z4irTbaTsOemSrDGUtaTl7Dro=
 github.com/kataras/sitemap v0.0.5/go.mod h1:KY2eugMKiPwsJgx7+U103YZehfvNGOXURubcGyk0Bz8=
+github.com/kevinburke/go.uuid v1.2.0 h1:+1qP8NdkJfgOSTrrrUuA7h0djr1VY77HFXYjR+zUcUo=
+github.com/kevinburke/go.uuid v1.2.0/go.mod h1:9gVngk1Hq1FjwewVAjsWEUT+xc6jP+p62CASaGmQ0NQ=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.8.2/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.9.7/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
@@ -281,6 +283,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/ryanuber/columnize v2.1.0+incompatible/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
+github.com/savannahghi/converterandformatter v0.0.3 h1:wRUC/Mv1tLfVbbMlatZj9/5du2C51b816NVJhtY8KW4=
+github.com/savannahghi/converterandformatter v0.0.3/go.mod h1:0o7yieYU10WabPqKuqj+5QL52eTL1eGElxjb+A68bbA=
 github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825 h1:fsQJI6leJba47gc06wrLyLlCYJzvNaVLubCYR7Ve7Uk=
 github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825/go.mod h1:DDdjQBO1qyf5BxLzhTs1uN91drCIHH2Lvr8aLdJwu/o=
 github.com/savannahghi/errorcodeutil v0.0.0-20210715070815-98283e9f49c6 h1:xqo9EJ0TXLOIGSN11AOXWr7FLq13lDVIGAQJieGSoy4=
