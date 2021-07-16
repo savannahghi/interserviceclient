@@ -25,7 +25,7 @@ notifications:
 
 env:
   global:
-    - GOOGLE_APPLICATION_CREDENTIALS=ci-account-key-file.json
+    - GOOGLE_APPLICATION_CREDENTIALS=account-ci.json
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1 # prevent gcloud from prompting
 
 # Anything in before_script that returns a nonzero exit code will flunk the
@@ -45,7 +45,7 @@ before_script:
   - go get github.com/stretchr/testify/assert@v1.7.0
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_c1e1fb6e0a0e_key -iv $encrypted_c1e1fb6e0a0e_iv -in ci-account-key-file.json.enc -out ci-account-key-file.json -d
+  - openssl aes-256-cbc -K $encrypted_612642ab12ab_key -iv $encrypted_612642ab12ab_iv -in account-ci.json.enc -out account-ci.json -d
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a

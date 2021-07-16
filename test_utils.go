@@ -351,3 +351,35 @@ func CreateOrLoginTestPhoneNumberUser(t *testing.T, onboardingClient *InterServi
 
 	return response, nil
 }
+
+// RemoveTestPhoneNumberUser removes the records created by the
+// test phonenumber user
+func RemoveTestPhoneNumberUser(
+	t *testing.T,
+	onboardingClient *InterServiceClient,
+) error {
+	ctx := context.Background()
+
+	if onboardingClient == nil {
+		return fmt.Errorf("nil ISC client")
+	}
+
+	payload := map[string]interface{}{
+		"phoneNumber": TestUserPhoneNumber,
+	}
+	resp, err := onboardingClient.MakeRequest(
+		ctx,
+		http.MethodPost,
+		removeUserByPhone,
+		payload,
+	)
+	if err != nil {
+		return fmt.Errorf("unable to make a request to remove test user: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil // This is a test utility. Do not block if the user is not found
+	}
+
+	return nil
+}

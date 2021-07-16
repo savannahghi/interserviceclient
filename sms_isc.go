@@ -12,8 +12,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/savannahghi/converterandformatter"
 	"github.com/savannahghi/serverutils"
-	"github.com/ttacon/libphonenumber"
 )
 
 const (
@@ -31,7 +31,6 @@ type SmsISC struct {
 
 // SendSMS is send a text message to specified phone No.s both local and foreign
 func SendSMS(ctx context.Context, phoneNumbers []string, message string, smsClient, twilioClient SmsISC) error {
-
 	if message == "" {
 		return fmt.Errorf("sms not sent: `message` needs to be supplied")
 	}
@@ -106,30 +105,13 @@ func IsMSISDNValid(msisdn string) bool {
 	return reKen.MatchString(msisdn)
 }
 
-// NormalizeMSISDN validates the input phone number.
-// For valid phone numbers, it normalizes them to international format
-// e.g +2547........
-func NormalizeMSISDN(msisdn string) (*string, error) {
-	if !IsMSISDNValid(msisdn) {
-		return nil, fmt.Errorf("invalid phone number: %s", msisdn)
-	}
-	num, err := libphonenumber.Parse(msisdn, defaultRegion)
-	if err != nil {
-		return nil, err
-	}
-	formatted := libphonenumber.Format(num, libphonenumber.INTERNATIONAL)
-	cleaned := strings.ReplaceAll(formatted, " ", "")
-	cleaned = strings.ReplaceAll(cleaned, "-", "")
-	return &cleaned, nil
-}
-
 // VerifyOTP confirms a phone number is valid by verifying the code that was sent to the number
 func VerifyOTP(ctx context.Context, msisdn string, otp string, otpClient *InterServiceClient) (bool, error) {
 	if otpClient == nil {
 		return false, fmt.Errorf("nil OTP client")
 	}
 
-	normalized, err := NormalizeMSISDN(msisdn)
+	normalized, err := converterandformatter.NormalizeMSISDN(msisdn)
 	if err != nil {
 		return false, fmt.Errorf("invalid phone format: %w", err)
 	}
