@@ -6,6 +6,12 @@ const (
 	// Secret Key for signing json web tokens
 	JWTSecretKey = "JWT_KEY"
 
+	// TestUserPin used for testing purposes
+	TestUserPin = "1234"
+
+	// AuthTokenContextKey is used to add/retrieve the Firebase UID on the context
+	AuthTokenContextKey = ContextKey("UID")
+
 	// The file that contains dependency definition. Each service which depends on other service
 	// via REST, need to have this file in their root
 	DepsFileName = "deps.yaml"

@@ -20,7 +20,7 @@ import (
 )
 
 // CoverageThreshold sets the test coverage threshold below which the tests will fail
-const CoverageThreshold = 0.52
+const CoverageThreshold = 0.3
 
 func TestMain(m *testing.M) {
 	os.Setenv("MESSAGE_KEY", "this-is-a-test-key$$$")
