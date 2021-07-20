@@ -383,3 +383,34 @@ func RemoveTestPhoneNumberUser(
 
 	return nil
 }
+
+// GetTestGraphQLHeaders gets relevant GraphQLHeaders for running
+// GraphQL acceptance tests
+func GetTestGraphQLHeaders(
+	t *testing.T,
+	onboardingClient *InterServiceClient,
+) (map[string]string, error) {
+	authorization, err := GetTestBearerTokenHeader(t, onboardingClient)
+	if err != nil {
+		return nil, fmt.Errorf("can't Generate Bearer Token: %s", err)
+	}
+	return req.Header{
+		"Accept":        "application/json",
+		"Content-Type":  "application/json",
+		"Authorization": authorization,
+	}, nil
+}
+
+// GetTestBearerTokenHeader gets bearer Token Header for running
+// GraphQL acceptance tests
+func GetTestBearerTokenHeader(
+	t *testing.T,
+	onboardingClient *InterServiceClient,
+) (string, error) {
+	user, err := CreateOrLoginTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Bearer %s", *user.Auth.IDToken), nil
+}
