@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/savannahghi/firebase_tools.svg?branch=main)](https://travis-ci.com/savannahghi/firebase_tools)
+[![Build Status](https://travis-ci.com/savannahghi/interserviceclient.svg?branch=main)](https://travis-ci.com/savannahghi/interserviceclient)
 [![Maintained](https://img.shields.io/badge/Maintained-Actively-informational.svg?style=for-the-badge)](https://shields.io/)
 # Interservice Library
 interserviceclient  play a major role in implementing Microservices Inter-service communication using either HTTP protocol or asynchronous message patterns.
