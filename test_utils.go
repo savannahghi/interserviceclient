@@ -15,6 +15,7 @@ import (
 	"github.com/savannahghi/enumutils"
 	"github.com/savannahghi/errorcodeutil"
 	"github.com/savannahghi/feedlib"
+	"github.com/savannahghi/firebasetools"
 	"github.com/savannahghi/profileutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -71,7 +72,7 @@ func GetPhoneNumberAuthenticatedContextAndToken(
 	authToken := &auth.Token{
 		UID: userResponse.Auth.UID,
 	}
-	authenticatedContext := context.WithValue(ctx, AuthTokenContextKey, authToken)
+	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
 	return authenticatedContext, authToken, nil
 }
 
