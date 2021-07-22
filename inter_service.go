@@ -238,12 +238,6 @@ func getDepsPath(path string) string {
 	return path
 }
 
-// GetRunningEnvironment returns the environment where the service is running. Important
-// so as to point to the correct deps
-func GetRunningEnvironment() string {
-	return serverutils.MustGetEnvVar(Environment)
-}
-
 // GetDepFromConfig retrives a specific config from config slice
 func GetDepFromConfig(name string, config []Dep) *Dep {
 	var d Dep
@@ -257,31 +251,31 @@ func GetDepFromConfig(name string, config []Dep) *Dep {
 
 // SetupISCclient returns an InterServiceClient
 func SetupISCclient(config DepsConfig, serviceName string) (*InterServiceClient, error) {
-	if GetRunningEnvironment() == StagingEnv {
+	if serverutils.GetRunningEnvironment() == serverutils.StagingEnv {
 		dep := GetDepFromConfig(serviceName, config.Staging)
 		client, err := NewInterserviceClient(ISCService{Name: dep.DepName, RootDomain: dep.DepRootDomain})
 		return client, err
 	}
 
-	if GetRunningEnvironment() == TestingEnv {
+	if serverutils.GetRunningEnvironment() == serverutils.TestingEnv {
 		dep := GetDepFromConfig(serviceName, config.Testing)
 		client, err := NewInterserviceClient(ISCService{Name: dep.DepName, RootDomain: dep.DepRootDomain})
 		return client, err
 	}
 
-	if GetRunningEnvironment() == DemoEnv {
+	if serverutils.GetRunningEnvironment() == serverutils.DemoEnv {
 		dep := GetDepFromConfig(serviceName, config.Demo)
 		client, err := NewInterserviceClient(ISCService{Name: dep.DepName, RootDomain: dep.DepRootDomain})
 		return client, err
 	}
 
-	if GetRunningEnvironment() == ProdEnv {
+	if serverutils.GetRunningEnvironment() == serverutils.ProdEnv {
 		dep := GetDepFromConfig(serviceName, config.Production)
 		client, err := NewInterserviceClient(ISCService{Name: dep.DepName, RootDomain: dep.DepRootDomain})
 		return client, err
 	}
 
-	if GetRunningEnvironment() == E2eEnv {
+	if serverutils.GetRunningEnvironment() == E2eEnv {
 		dep := GetDepFromConfig(serviceName, config.E2E)
 		client, err := NewInterserviceClient(ISCService{Name: dep.DepName, RootDomain: dep.DepRootDomain})
 		return client, err
