@@ -287,12 +287,13 @@ github.com/savannahghi/converterandformatter v0.0.3 h1:wRUC/Mv1tLfVbbMlatZj9/5du
 github.com/savannahghi/converterandformatter v0.0.3/go.mod h1:0o7yieYU10WabPqKuqj+5QL52eTL1eGElxjb+A68bbA=
 github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825 h1:fsQJI6leJba47gc06wrLyLlCYJzvNaVLubCYR7Ve7Uk=
 github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825/go.mod h1:DDdjQBO1qyf5BxLzhTs1uN91drCIHH2Lvr8aLdJwu/o=
-github.com/savannahghi/errorcodeutil v0.0.0-20210715070815-98283e9f49c6 h1:xqo9EJ0TXLOIGSN11AOXWr7FLq13lDVIGAQJieGSoy4=
-github.com/savannahghi/errorcodeutil v0.0.0-20210715070815-98283e9f49c6/go.mod h1:BthIcPLuJe9K5eE97/qrcfkS+3azS91UFerowDIq/eE=
+github.com/savannahghi/errorcodeutil v0.0.1 h1:q5JYMrzXDAJ9/99fV7Mj2bFF1XOidlRgSlYHy73q2GA=
+github.com/savannahghi/errorcodeutil v0.0.1/go.mod h1:nNBaBjatvoRusnDr2aRoNr4Rpmz9Z779mjcL0tr/IXk=
 github.com/savannahghi/feedlib v0.0.0-20210628122532-ef88e353d4d6 h1:KKb7B/X+k5VHEfka8sM8x9p7s9HPbb9C+lMmEaByGVE=
 github.com/savannahghi/feedlib v0.0.0-20210628122532-ef88e353d4d6/go.mod h1:P6YHmWsa/TK/qTb2U1ryjuASotTQmbarArB0LYLjMo4=
-github.com/savannahghi/firebasetools v0.0.5 h1:citJhhPThsLBGTfCtD0SKfo3Xi4cJcsyfbc9G6zevH8=
 github.com/savannahghi/firebasetools v0.0.5/go.mod h1:obAxyBfPaGTx/g86LF19gSmmEh5x+Tbnziatk514mUQ=
+github.com/savannahghi/firebasetools v0.0.12 h1:cws8tPmPC3BUz82SmQDfYeRRMOTq65Qen3uVV8oeDZU=
+github.com/savannahghi/firebasetools v0.0.12/go.mod h1:0xgpolbK6P2GzUveYSeF9DcMTkJvF8pIWLes1LLtTEE=
 github.com/savannahghi/profileutils v0.0.6 h1:eUtU5Q2ElEytQqgx8zED6ts7UsyCLzL/gvDkDmdUXWY=
 github.com/savannahghi/profileutils v0.0.6/go.mod h1:Ct0sjzOW9zjDN58ynT5GTV6M2hHMY3nsFDV08I6gpO4=
 github.com/savannahghi/scalarutils v0.0.0-20210622091443-bad5089abdad h1:v3QPK6KIGkOozqZ/DqMwbmF1LcqJO6k25arenLls9SY=
@@ -339,6 +340,8 @@ github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyC
 github.com/valyala/fasthttp v1.6.0/go.mod h1:FstJa9V+Pj9vQ7OJie2qMHdwemEDaDiSdBnvPM1Su9w=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a/go.mod h1:v3UYOV9WzVtRmSR+PDvWpU/qWl4Wa5LApYYX4ZtKbio=
+github.com/vmihailenco/msgpack v4.0.4+incompatible h1:dSLoQfGFAo3F6OoNhwUmLwVgaUXK79GlxNBwueZn0xI=
+github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f h1:J9EGpcZtP0E/raorCMxlFGSTBrsSlaDGf3jU/qvAE2c=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
 github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 h1:EzJWgHovont7NscjpAxXsDA8S8BMYve8Y5+7cuRE7R0=
