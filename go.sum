@@ -292,8 +292,8 @@ github.com/savannahghi/errorcodeutil v0.0.1/go.mod h1:nNBaBjatvoRusnDr2aRoNr4Rpm
 github.com/savannahghi/feedlib v0.0.0-20210628122532-ef88e353d4d6 h1:KKb7B/X+k5VHEfka8sM8x9p7s9HPbb9C+lMmEaByGVE=
 github.com/savannahghi/feedlib v0.0.0-20210628122532-ef88e353d4d6/go.mod h1:P6YHmWsa/TK/qTb2U1ryjuASotTQmbarArB0LYLjMo4=
 github.com/savannahghi/firebasetools v0.0.5/go.mod h1:obAxyBfPaGTx/g86LF19gSmmEh5x+Tbnziatk514mUQ=
-github.com/savannahghi/firebasetools v0.0.12 h1:cws8tPmPC3BUz82SmQDfYeRRMOTq65Qen3uVV8oeDZU=
-github.com/savannahghi/firebasetools v0.0.12/go.mod h1:0xgpolbK6P2GzUveYSeF9DcMTkJvF8pIWLes1LLtTEE=
+github.com/savannahghi/firebasetools v0.0.13 h1:2eBFwzsnmhRUzxfgQZxOjedlMuyef2dz4tvpw59pJkE=
+github.com/savannahghi/firebasetools v0.0.13/go.mod h1:0xgpolbK6P2GzUveYSeF9DcMTkJvF8pIWLes1LLtTEE=
 github.com/savannahghi/profileutils v0.0.6 h1:eUtU5Q2ElEytQqgx8zED6ts7UsyCLzL/gvDkDmdUXWY=
 github.com/savannahghi/profileutils v0.0.6/go.mod h1:Ct0sjzOW9zjDN58ynT5GTV6M2hHMY3nsFDV08I6gpO4=
 github.com/savannahghi/scalarutils v0.0.0-20210622091443-bad5089abdad h1:v3QPK6KIGkOozqZ/DqMwbmF1LcqJO6k25arenLls9SY=
