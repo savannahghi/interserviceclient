@@ -112,6 +112,23 @@ func (c InterServiceClient) MakeRequest(ctx context.Context, method string, path
 		return nil, tknErr
 	}
 
+	// A GET request should not send data when doing a request. We should use query parameters
+	// instead of having a request body. In some cases where a GET request has an empty body {},
+	// it might result in status code 400 with the error:
+	//  `Your client has issued a malformed or illegal request. That’s all we know.`
+	if method == http.MethodGet {
+		req, reqErr := http.NewRequestWithContext(ctx, method, url, nil)
+		if reqErr != nil {
+			return nil, reqErr
+		}
+
+		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Content-Type", "application/json")
+
+		return c.httpClient.Do(req)
+	}
+
 	encoded, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
