@@ -6,12 +6,6 @@ import (
 	"strings"
 )
 
-// ExtractBearerToken gets a bearer token from an Authorization header.
-// This is expected to contain a Firebase idToken prefixed with "Bearer "
-func ExtractBearerToken(r *http.Request) (string, error) {
-	return ExtractToken(r, "Authorization", "Bearer")
-}
-
 // ExtractToken extracts a token with the specified prefix from the specified header
 func ExtractToken(r *http.Request, header string, prefix string) (string, error) {
 	if r == nil {

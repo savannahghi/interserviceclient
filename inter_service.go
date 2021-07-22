@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/savannahghi/firebasetools"
 	"github.com/savannahghi/serverutils"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"gopkg.in/yaml.v2"
@@ -186,7 +187,7 @@ func InterServiceAuthenticationMiddleware() func(http.Handler) http.Handler {
 // HasValidJWTBearerToken returns true with no errors if the request has a valid bearer token in the authorization header.
 // Otherwise, it returns false and the error in a map with the key "error"
 func HasValidJWTBearerToken(r *http.Request) (bool, map[string]string, *jwt.Token) {
-	bearerToken, err := ExtractBearerToken(r)
+	bearerToken, err := firebasetools.ExtractBearerToken(r)
 	if err != nil {
 
 		return false, serverutils.ErrorMap(err), nil
