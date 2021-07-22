@@ -10,6 +10,7 @@ require (
 	github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825
 	github.com/savannahghi/errorcodeutil v0.0.0-20210715070815-98283e9f49c6
 	github.com/savannahghi/feedlib v0.0.0-20210628122532-ef88e353d4d6
+	github.com/savannahghi/firebasetools v0.0.5
 	github.com/savannahghi/profileutils v0.0.6
 	github.com/savannahghi/serverutils v0.0.2
 	github.com/sirupsen/logrus v1.8.1
