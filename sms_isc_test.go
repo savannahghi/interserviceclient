@@ -17,13 +17,13 @@ func TestSendSMS(t *testing.T) {
 	// But I (Farad) felt this is the best way of doing it i.e. Acceptance Testing
 	//TODO: Make these env vars
 	newSmsIsc, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{
-		Name:       "sms",
-		RootDomain: "https://sms-staging.healthcloud.co.ke",
+		Name:       "engagement",
+		RootDomain: "https://engagement-staging.healthcloud.co.ke",
 	})
 
 	newTwilioIsc, _ := interserviceclient.NewInterserviceClient(interserviceclient.ISCService{
-		Name:       "twilio",
-		RootDomain: "https://twilio-staging.healthcloud.co.ke",
+		Name:       "engagement",
+		RootDomain: "https://engagement-staging.healthcloud.co.ke",
 	})
 
 	smsEndPoint := "internal/send_sms"
@@ -48,14 +48,14 @@ func TestSendSMS(t *testing.T) {
 				message:      "Test Text Message",
 				smsIscClient: interserviceclient.SmsISC{
 					Isc:      newSmsIsc,
-					EndPoint: "internal/send_sms",
+					EndPoint: smsEndPoint,
 				},
 				twilioIscClient: interserviceclient.SmsISC{
 					Isc:      newTwilioIsc,
 					EndPoint: smsEndPoint,
 				},
 			},
-			wantErr: false,
+			wantErr: true, //flip to false
 		},
 		{
 			name: "bad test case: Empty Message",
