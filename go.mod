@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/imroc/req v0.3.0
 	github.com/savannahghi/converterandformatter v0.0.3
 	github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825

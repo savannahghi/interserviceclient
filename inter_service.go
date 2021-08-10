@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/savannahghi/firebasetools"
 	"github.com/savannahghi/serverutils"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"

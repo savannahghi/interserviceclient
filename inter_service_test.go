@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/savannahghi/interserviceclient"
 	"github.com/savannahghi/serverutils"
 	"github.com/stretchr/testify/assert"
