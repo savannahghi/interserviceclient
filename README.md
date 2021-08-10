@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/savannahghi/interserviceclient.svg?branch=main)](https://travis-ci.com/savannahghi/interserviceclient)
-[![Maintained](https://img.shields.io/badge/Maintained-Actively-informational.svg?style=for-the-badge)](https://shields.io/)
+[![Maintained](https://img.shields.io/badge/Maintained-Actively-informational.svg?style=for-the-badge)](https://shields.io/) ![Linting and Tests](https://github.com/savannahghi/interserviceclient/actions/workflows/ci.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/savannahghi/interserviceclient/badge.svg?branch=main)](https://coveralls.io/github/savannahghi/interserviceclient?branch=main)
 # Interservice Library
 interserviceclient  play a major role in implementing Microservices Inter-service communication using either HTTP protocol or asynchronous message patterns.
 
@@ -56,7 +56,7 @@ export FIREBASE_WEB_API_KEY="<a web API key that corresponds to the project name
 export FIREBASE_DYNAMIC_LINKS_DOMAIN=https://bwlci.page.link
 # Firestore documents root collection suffix
 export ROOT_COLLECTION_SUFFIX="testing"
-
+export JWT_KEY="jwt-key"
 ```
 
 This file *must not* be committed to version control.
