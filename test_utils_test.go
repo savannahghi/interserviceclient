@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/savannahghi/interserviceclient"
+	"github.com/savannahghi/profileutils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -219,6 +220,13 @@ func TestCreateOrLoginTestPhoneNumberUser(t *testing.T) {
 			}
 		})
 	}
+
+	// clean up
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
 }
 
 func TestRemoveTestPhoneNumberUser(t *testing.T) {
@@ -319,9 +327,16 @@ func TestUpdateBioData(t *testing.T) {
 			}
 		})
 	}
+
+	// clean up
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
 }
 
-func TestAddAdminPermissions(t *testing.T) {
+func TestCreateTestRole(t *testing.T) {
 	onboardingClient, err := onboardingISCClient()
 	if err != nil {
 		t.Errorf("failed to initialize onboarding test ISC client")
@@ -334,40 +349,252 @@ func TestAddAdminPermissions(t *testing.T) {
 		return
 	}
 
+	// used in test clean up
+	var userID, roleID, roleName string
+	userID = response.Profile.ID
+	roleName = "Test Create Role"
+
 	type args struct {
-		t                *testing.T
-		onboardingClient *interserviceclient.InterServiceClient
-		phone            string
+		t          *testing.T
+		user       profileutils.UserResponse
+		rootDomain string
+		roleName   string
 	}
 	tests := []struct {
 		name    string
 		args    args
+		want    *profileutils.Role
 		wantErr bool
 	}{
 		{
-			name: "happy case :)",
+			name: "success: create test role",
 			args: args{
-				t:                t,
+				t:          t,
+				user:       *response,
+				rootDomain: OnboardingRootDomain,
+				roleName:   roleName,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := interserviceclient.CreateTestRole(tt.args.t, tt.args.user, tt.args.rootDomain, tt.args.roleName)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateTestRole() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && got == nil {
+				t.Errorf("CreateTestRole() = %v, want %v", got, tt.want)
+			}
+			roleID = got.ID
+		})
+	}
+
+	// clean up
+	interserviceclient.AssignTestRole(t, *response, OnboardingRootDomain, userID, roleID)
+	interserviceclient.RemoveTestRole(t, *response, OnboardingRootDomain, roleName)
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
+}
+
+func TestAssignTestRole(t *testing.T) {
+	onboardingClient, err := onboardingISCClient()
+	if err != nil {
+		t.Errorf("failed to initialize onboarding test ISC client")
+		return
+	}
+
+	response, err := interserviceclient.CreateOrLoginTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("unable to create user %v", err)
+		return
+	}
+
+	// used in test clean up
+	roleName := "Test Assign Role"
+
+	role, err := interserviceclient.CreateTestRole(t, *response, OnboardingRootDomain, roleName)
+	if err != nil {
+		t.Errorf("unable to create test role %v", err)
+		return
+	}
+
+	type args struct {
+		t          *testing.T
+		user       profileutils.UserResponse
+		rootDomain string
+		userID     string
+		roleID     string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "success: assign test role",
+			args: args{
+				t:          t,
+				user:       *response,
+				rootDomain: OnboardingRootDomain,
+				userID:     response.Profile.ID,
+				roleID:     role.ID,
+			},
+			want:    true,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := interserviceclient.AssignTestRole(tt.args.t, tt.args.user, tt.args.rootDomain, tt.args.userID, tt.args.roleID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AssignTestRole() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("AssignTestRole() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// clean up
+	_, err = interserviceclient.RemoveTestRole(t, *response, OnboardingRootDomain, roleName)
+	if err != nil {
+		t.Errorf("failed to remove test role: %v", err)
+		return
+	}
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
+}
+
+func TestRemoveTestRole(t *testing.T) {
+	onboardingClient, err := onboardingISCClient()
+	if err != nil {
+		t.Errorf("failed to initialize onboarding test ISC client")
+		return
+	}
+
+	response, err := interserviceclient.CreateOrLoginTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("unable to create user %v", err)
+		return
+	}
+
+	roleName := "Test Delete Role"
+
+	role, err := interserviceclient.CreateTestRole(t, *response, OnboardingRootDomain, roleName)
+	if err != nil {
+		t.Errorf("unable to create test role %v", err)
+		return
+	}
+
+	_, err = interserviceclient.AssignTestRole(t, *response, OnboardingRootDomain, response.Profile.ID, role.ID)
+	if err != nil {
+		t.Errorf("unable to assign test role %v", err)
+		return
+	}
+
+	type args struct {
+		t          *testing.T
+		user       profileutils.UserResponse
+		rootDomain string
+		roleName   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "success: remove test role",
+			args: args{
+				t:          t,
+				user:       *response,
+				rootDomain: OnboardingRootDomain,
+				roleName:   roleName,
+			},
+			want:    true,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := interserviceclient.RemoveTestRole(tt.args.t, tt.args.user, tt.args.rootDomain, tt.args.roleName)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("RemoveTestRole() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("RemoveTestRole() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// clean up
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
+}
+
+func TestCreateOrLoginTestPhoneNumberAuthorizedUser(t *testing.T) {
+	onboardingClient, err := onboardingISCClient()
+	if err != nil {
+		t.Errorf("failed to initialize onboarding test ISC client")
+	}
+
+	type args struct {
+		t                *testing.T
+		onboardingClient *interserviceclient.InterServiceClient
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *profileutils.UserResponse
+		wantErr bool
+	}{
+		{
+			name: "success: create a test user successfully",
+			args: args{
 				onboardingClient: onboardingClient,
-				phone:            *response.Profile.PrimaryPhone,
 			},
 			wantErr: false,
 		},
 		{
-			name: "sad case :(",
+			name: "failure: failed to create a test user successfully",
 			args: args{
-				t:                t,
-				onboardingClient: onboardingClient,
-				phone:            "not-a-phone-number",
+				onboardingClient: nil,
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := interserviceclient.AddAdminPermissions(tt.args.t, tt.args.onboardingClient, tt.args.phone); (err != nil) != tt.wantErr {
-				t.Errorf("AddAdminPermissions() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := interserviceclient.CreateOrLoginTestPhoneNumberAuthorizedUser(tt.args.t, tt.args.onboardingClient)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateOrLoginTestPhoneNumberAuthorizedUser() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && got == nil {
+				t.Errorf("CreateOrLoginTestPhoneNumberAuthorizedUser() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+
+	// clean up
+	err = interserviceclient.RemoveTestPhoneNumberAuthorizedUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
 	}
 }

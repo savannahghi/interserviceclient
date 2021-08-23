@@ -1,10 +1,12 @@
 package interserviceclient
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,6 +30,9 @@ const (
 	removeUserByPhone = "testing/remove_user"
 	addAdmin          = "testing/add_admin_permissions"
 	updateBioData     = "testing/update_user_profile"
+	createRole        = "roles/create_role"
+	assignRole        = "roles/assign_role"
+	removeRoleByName  = "roles/remove_role"
 )
 
 // ContextKey is used as a type for the UID key for the Firebase *auth.Token on context.Context.
@@ -66,6 +71,24 @@ func GetPhoneNumberAuthenticatedContextAndToken(
 ) (context.Context, *auth.Token, error) {
 	ctx := context.Background()
 	userResponse, err := CreateOrLoginTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		return nil, nil, err
+	}
+	authToken := &auth.Token{
+		UID: userResponse.Auth.UID,
+	}
+	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
+	return authenticatedContext, authToken, nil
+}
+
+// GetTestAuthorizedContextAndToken returns an authorized phone number with permissions logged in context
+// and an auth Token that contains the the test user UID useful for test purposes
+func GetTestAuthorizedContextAndToken(
+	t *testing.T,
+	onboardingClient *InterServiceClient,
+) (context.Context, *auth.Token, error) {
+	ctx := context.Background()
+	userResponse, err := CreateOrLoginTestPhoneNumberAuthorizedUser(t, onboardingClient)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -175,41 +198,6 @@ func LoginTestPhoneUser(
 	return response, nil
 }
 
-// AddAdminPermissions adds ADMIN permissions to our test user
-func AddAdminPermissions(
-	t *testing.T,
-	onboardingClient *InterServiceClient,
-	phone string,
-) error {
-	ctx := context.Background()
-
-	phonePayload := map[string]interface{}{
-		"phoneNumber": phone,
-	}
-
-	resp, err := onboardingClient.MakeRequest(
-		ctx,
-		http.MethodPost,
-		addAdmin,
-		phonePayload,
-	)
-
-	if err != nil {
-		return fmt.Errorf("unable to make add admin request: %w", err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("unable to convert response to string: %v", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("got status code %v with resp body: %s", resp.StatusCode, string(body))
-	}
-
-	return nil
-}
-
 // UpdateBioData adds Bio Data to our test user
 func UpdateBioData(
 	t *testing.T,
@@ -253,7 +241,6 @@ func UpdateBioData(
 // authenticated user response
 // For documentation and test purposes only
 func CreateOrLoginTestPhoneNumberUser(t *testing.T, onboardingClient *InterServiceClient) (*profileutils.UserResponse, error) {
-	ctx := context.Background()
 
 	phone := TestUserPhoneNumber
 	PIN := TestUserPin
@@ -280,14 +267,6 @@ func CreateOrLoginTestPhoneNumberUser(t *testing.T, onboardingClient *InterServi
 				return nil, fmt.Errorf("unable to log in the test user: %v", err)
 			}
 
-			perms := userResponse.Profile.Permissions
-			if len(perms) == 0 {
-				err = AddAdminPermissions(t, onboardingClient, phone)
-				if err != nil {
-					return nil, fmt.Errorf("unable to add admin permissions: %v", err)
-				}
-			}
-
 			if userResponse.Profile.UserBioData.FirstName == nil {
 				err = UpdateBioData(t, onboardingClient, userResponse.Auth.UID)
 				if err != nil {
@@ -300,6 +279,65 @@ func CreateOrLoginTestPhoneNumberUser(t *testing.T, onboardingClient *InterServi
 
 		return nil, fmt.Errorf("failed to verify test phone number: %v", err)
 	}
+
+	response, err := CreateTestPhoneNumberUser(t, onboardingClient, otp)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create test user:%v", err)
+	}
+
+	return response, nil
+}
+
+// CreateOrLoginTestPhoneNumberAuthorizedUser creates an phone number test user if they
+// do not exist or `Logs them in` if the test user exists to retrieve
+// authenticated user response
+// For documentation and test purposes only
+func CreateOrLoginTestPhoneNumberAuthorizedUser(t *testing.T, onboardingClient *InterServiceClient) (*profileutils.UserResponse, error) {
+	userResponse, err := CreateOrLoginTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		return nil, err
+	}
+
+	userScopes := userResponse.Auth.Scopes
+	expectedScopes := testScopes()
+	if len(userScopes) != len(expectedScopes) {
+		var role profileutils.Role
+
+		if len(userScopes) == 0 {
+			r, err := CreateTestRole(t, *userResponse, onboardingClient.RequestRootDomain, TestRoleName)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create test role: %v", err)
+			}
+			role = *r
+		} else {
+			_, err := RemoveTestRole(t, *userResponse, onboardingClient.RequestRootDomain, TestRoleName)
+			if err != nil {
+				return nil, fmt.Errorf("unable to remove test role: %v", err)
+			}
+			r, err := CreateTestRole(t, *userResponse, onboardingClient.RequestRootDomain, TestRoleName)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create test role: %v", err)
+			}
+			role = *r
+		}
+
+		_, err = AssignTestRole(t, *userResponse, onboardingClient.RequestRootDomain, userResponse.Profile.ID, role.ID)
+		if err != nil {
+			return nil, fmt.Errorf("unable to assign test role: %v", err)
+		}
+	}
+
+	return userResponse, nil
+}
+
+// CreateTestPhoneNumberUser creates the user for test phone number
+func CreateTestPhoneNumberUser(t *testing.T, onboardingClient *InterServiceClient, otp string) (*profileutils.UserResponse, error) {
+	ctx := context.Background()
+
+	phone := TestUserPhoneNumber
+	PIN := TestUserPin
+	flavour := feedlib.FlavourConsumer
+
 	createUserPayload := map[string]interface{}{
 		"phoneNumber": phone,
 		"pin":         PIN,
@@ -333,14 +371,6 @@ func CreateOrLoginTestPhoneNumberUser(t *testing.T, onboardingClient *InterServi
 	err = json.Unmarshal(signUpResp, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal OTP: %v", err)
-	}
-
-	perms := response.Profile.Permissions
-	if len(perms) == 0 {
-		err = AddAdminPermissions(t, onboardingClient, phone)
-		if err != nil {
-			return nil, fmt.Errorf("unable to add admin permissions: %v", err)
-		}
 	}
 
 	if response.Profile.UserBioData.FirstName == nil {
@@ -385,6 +415,39 @@ func RemoveTestPhoneNumberUser(
 	return nil
 }
 
+// RemoveTestPhoneNumberAuthorizedUser removes the records created by the
+// test phonenumber user
+func RemoveTestPhoneNumberAuthorizedUser(
+	t *testing.T,
+	onboardingClient *InterServiceClient,
+) error {
+	if onboardingClient == nil {
+		return fmt.Errorf("nil ISC client")
+	}
+
+	phone := TestUserPhoneNumber
+	PIN := TestUserPin
+	flavour := feedlib.FlavourConsumer
+
+	userResponse, err := LoginTestPhoneUser(
+		t,
+		phone,
+		PIN,
+		flavour,
+		onboardingClient,
+	)
+	if err != nil {
+		return nil // This is a test utility. Do not block if the user is not found
+	}
+
+	_, err = RemoveTestRole(t, *userResponse, onboardingClient.RequestRootDomain, TestRoleName)
+	if err != nil {
+		return nil // This is a test utility. Do not block if the role is not removed
+	}
+
+	return RemoveTestPhoneNumberUser(t, onboardingClient)
+}
+
 // GetTestGraphQLHeaders gets relevant GraphQLHeaders for running
 // GraphQL acceptance tests
 func GetTestGraphQLHeaders(
@@ -414,4 +477,139 @@ func GetTestBearerTokenHeader(
 	}
 
 	return fmt.Sprintf("Bearer %s", *user.Auth.IDToken), nil
+}
+
+func testScopes() []string {
+	ctx := context.Background()
+	allPerms, _ := profileutils.AllPermissions(ctx)
+
+	scopes := []string{}
+	for _, perm := range allPerms {
+		scopes = append(scopes, perm.Scope)
+	}
+
+	return scopes
+}
+
+// CreateTestRole creates a role that is used for testing
+func CreateTestRole(t *testing.T, user profileutils.UserResponse, rootDomain, roleName string) (*profileutils.Role, error) {
+	type Response struct {
+		ID          string                    `json:"id"`
+		Name        string                    `json:"name"`
+		Description string                    `json:"description"`
+		Active      bool                      `json:"active"`
+		Scopes      []string                  `json:"scopes"`
+		Permissions []profileutils.Permission `json:"permissions"`
+	}
+
+	createRolePayload := map[string]interface{}{
+		"name":        roleName,
+		"description": "A role for running tests",
+		"scopes":      testScopes(),
+	}
+
+	bs, _ := json.Marshal(createRolePayload)
+	payload := bytes.NewBuffer(bs)
+	url := fmt.Sprintf("%s/%s", rootDomain, createRole)
+
+	req, _ := http.NewRequest(http.MethodPost, url, payload)
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *user.Auth.IDToken))
+
+	client := http.DefaultClient
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP error: %v", err)
+
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("failed to create test role: expected status to be %v got %v ", http.StatusCreated, resp.StatusCode)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("HTTP error: %v", err)
+	}
+
+	var r Response
+	err = json.Unmarshal(data, &r)
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshall response: %v", err)
+	}
+
+	role := &profileutils.Role{
+		ID:          r.ID,
+		Name:        r.Name,
+		Description: r.Description,
+		Active:      r.Active,
+		Scopes:      r.Scopes,
+	}
+
+	return role, nil
+}
+
+// AssignTestRole assigns the given role to a user
+func AssignTestRole(t *testing.T, user profileutils.UserResponse, rootDomain, userID, roleID string) (bool, error) {
+	assignRolePayload := map[string]string{
+		"userID": userID,
+		"roleID": roleID,
+	}
+
+	bs, _ := json.Marshal(assignRolePayload)
+	payload := bytes.NewBuffer(bs)
+	url := fmt.Sprintf("%s/%s", rootDomain, assignRole)
+
+	req, _ := http.NewRequest(http.MethodPost, url, payload)
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *user.Auth.IDToken))
+
+	client := http.DefaultClient
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("HTTP error: %v", err)
+
+	}
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("failed to assign test role: expected status to be %v got %v ", http.StatusCreated, resp.StatusCode)
+	}
+
+	return true, nil
+}
+
+// RemoveTestRole removes the test role
+func RemoveTestRole(t *testing.T, user profileutils.UserResponse, rootDomain, roleName string) (bool, error) {
+	deleteRolePayload := map[string]string{
+		"name": roleName,
+	}
+
+	bs, _ := json.Marshal(deleteRolePayload)
+	payload := bytes.NewBuffer(bs)
+	url := fmt.Sprintf("%s/%s", rootDomain, removeRoleByName)
+
+	req, _ := http.NewRequest(http.MethodPost, url, payload)
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *user.Auth.IDToken))
+
+	client := http.DefaultClient
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("HTTP error: %v", err)
+
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("failed to assign test role: expected status to be %v got %v ", http.StatusCreated, resp.StatusCode)
+	}
+
+	return true, nil
 }
