@@ -23,4 +23,7 @@ const (
 
 	// TestUserPhoneNumberWithPin is used by integration tests
 	TestUserPhoneNumberWithPin = "+254778990088"
+
+	// The role used to run tests
+	TestRoleName = "Test Role"
 )
