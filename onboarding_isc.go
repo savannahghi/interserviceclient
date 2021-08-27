@@ -15,25 +15,25 @@ const (
 	registerUser = "internal/register_user"
 )
 
-// OnboardingISC is a representation of an ISC client
-type OnboardingISC interface {
+// OnboardingService is a representation of an ISC client
+type OnboardingService interface {
 	RegisterUser(ctx context.Context, payload interface{}) (*profileutils.UserProfile, error)
 }
 
-//OnboardingISCImpl represents the implemented methods in this ISC
-type OnboardingISCImpl struct {
+//OnboardingServiceImpl represents the implemented methods in this ISC
+type OnboardingServiceImpl struct {
 	isc *InterServiceClient
 }
 
-//NewOnboardingISC initializes a new instance of OnboardingISC
-func NewOnboardingISC(isc *InterServiceClient) OnboardingISC {
-	return &OnboardingISCImpl{
+//NewOnboardingService initializes a new instance of OnboardingServiceImpl
+func NewOnboardingService(isc *InterServiceClient) *OnboardingServiceImpl {
+	return &OnboardingServiceImpl{
 		isc: isc,
 	}
 }
 
 //RegisterUser makes the request to register a user
-func (o *OnboardingISCImpl) RegisterUser(ctx context.Context, payload interface{}) (*profileutils.UserProfile, error) {
+func (o *OnboardingServiceImpl) RegisterUser(ctx context.Context, payload interface{}) (*profileutils.UserProfile, error) {
 	res, err := o.isc.MakeRequest(ctx, http.MethodPost, registerUser, payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request, error: %v", err)
