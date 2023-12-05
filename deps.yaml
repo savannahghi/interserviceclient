@@ -1,9 +1,9 @@
 staging:
   - depName: profile
-    depRootDomain: https://profile-staging.healthcloud.co.ke
+    depRootDomain: https://profile.uat.bewell.slade360edi.com
 testing:
   - depName: profile
-    depRootDomain: https://profile-testing.healthcloud.co.ke
+    depRootDomain: https://profile.uat.bewell.slade360edi.com
 production:
   - depName: profile
     depRootDomain: https://profile-prod.healthcloud.co.ke

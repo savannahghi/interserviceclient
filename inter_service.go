@@ -212,7 +212,7 @@ type Dep struct {
 	DepRootDomain string `yaml:"depRootDomain"`
 }
 
-//DepsConfig is the config for dependencies of a particular service
+// DepsConfig is the config for dependencies of a particular service
 type DepsConfig struct {
 	Staging    []Dep `yaml:"staging"`
 	Testing    []Dep `yaml:"testing"`
