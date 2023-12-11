@@ -24,6 +24,7 @@ import (
 const (
 	anonymousUserUID  = "AgkGYKUsRifO2O9fTLDuVCMr2hb2" // This is an anonymous user
 	verifyPhone       = "testing/verify_phone"
+	updateUserDetails = "testing/update_user_profile"
 	createUserByPhone = "testing/create_user_by_phone"
 	loginByPhone      = "testing/login_by_phone"
 	removeUserByPhone = "testing/remove_user"
@@ -299,6 +300,9 @@ func CreateTestPhoneNumberUser(t *testing.T, onboardingClient *InterServiceClien
 	ctx := context.Background()
 
 	phone := TestUserPhoneNumber
+	firstName := "Test"
+	lastName := "User"
+	gender := "Male"
 	PIN := TestUserPin
 	flavour := feedlib.FlavourConsumer
 
@@ -333,6 +337,31 @@ func CreateTestPhoneNumberUser(t *testing.T, onboardingClient *InterServiceClien
 
 	var response *profileutils.UserResponse
 	err = json.Unmarshal(signUpResp, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal OTP: %v", err)
+	}
+	updateUserProfilePayload := map[string]interface{}{
+		"uid":       response.Auth.UID,
+		"firstName": firstName,
+		"lastName":  lastName,
+		"gender":    gender,
+	}
+	resp, err = onboardingClient.MakeRequest(
+		ctx,
+		http.MethodPost,
+		updateUserDetails,
+		updateUserProfilePayload,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to update user details: %w", err)
+	}
+	updateDetailsResp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("unable to convert response to string: %v", err)
+	}
+
+	var userProfile *profileutils.UserProfile
+	err = json.Unmarshal(updateDetailsResp, &userProfile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal OTP: %v", err)
 	}
