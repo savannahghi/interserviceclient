@@ -173,6 +173,12 @@ func TestCreateOrLoginTestPhoneNumberUser(t *testing.T) {
 	type args struct {
 		onboardingClient *interserviceclient.InterServiceClient
 	}
+	// clean of any pre-existing test users
+	err = interserviceclient.RemoveTestPhoneNumberUser(t, onboardingClient)
+	if err != nil {
+		t.Errorf("failed to remove test user: %v", err)
+		return
+	}
 	tests := []struct {
 		name    string
 		args    args
